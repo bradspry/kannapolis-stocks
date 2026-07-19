@@ -1,8 +1,10 @@
 # Kannapolis Index (KANDEX)
 
-A tiny Python stock tracker that snapshots ten companies, stores daily
-history in a local SQLite database, and prints a concise, emoji-friendly
-report ready to paste into a Facebook post.
+*by Brad Spry, Kannapolitan*
+
+A tiny stock tracker that snapshots Kannapolis-area companies, stores daily
+history in a local SQLite database (for trending), and prints a concise
+report.
 
 ```
 Kannapolis Index (KANDEX) 🐻📉

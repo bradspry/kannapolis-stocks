@@ -39,6 +39,7 @@ TREND_LOOKBACK_DAYS = 7
 
 
 def init_db(conn):
+    """Creates the prices and kandex_index tables if they don't exist yet."""
     conn.execute(
         """
         CREATE TABLE IF NOT EXISTS prices (
@@ -70,6 +71,7 @@ def fetch_quotes():
 
 
 def store_prices(conn, today, quotes):
+    """Upserts today's price snapshot for each symbol into the prices table."""
     conn.executemany(
         "INSERT OR REPLACE INTO prices (date, symbol, price) VALUES (?, ?, ?)",
         [(today, symbol, price) for symbol, (price, _) in quotes.items()],
@@ -104,6 +106,7 @@ def update_index(conn, today, avg_pct_change):
 
 
 def arrow(pct):
+    """Maps a % change to an up/down/flat emoji."""
     if pct > 0.001:
         return "⬆️"
     if pct < -0.001:
@@ -112,6 +115,7 @@ def arrow(pct):
 
 
 def build_report(conn, today, quotes):
+    """Builds the Facebook-ready text report and updates the composite index."""
     pct_changes = []
     stock_lines = []
     for symbol, name in COMPANIES:
@@ -142,6 +146,7 @@ def build_report(conn, today, quotes):
 
 
 def main():
+    """Fetches today's quotes, stores them, and prints the KANDEX report."""
     conn = sqlite3.connect(DB_PATH)
     init_db(conn)
     today = date.today().isoformat()
