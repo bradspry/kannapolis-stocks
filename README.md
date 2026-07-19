@@ -58,8 +58,8 @@ Run it once a day, after market close, for the cleanest results — see
 
 - Quotes are pulled live via [`yfinance`](https://github.com/ranaroussi/yfinance).
 - Each run stores a dated price snapshot per symbol in `kandex.db` (SQLite,
-  created automatically, ignored by git). This history powers the 7-day
-  trend annotations that appear once a week of data has accumulated.
+  created automatically). This history powers the 7-day trend annotations
+  that appear once a week of data has accumulated.
 - Per-stock daily % change is computed against Yahoo's previous close, so
   it's accurate even on the very first run.
 - **KANDEX Composite** is an equal-weighted index seeded at 1,000.0. Each
