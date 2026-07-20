@@ -138,7 +138,7 @@ def build_report(conn, today, quotes):
     index_pct = ((index_value - prev_index) / prev_index) * 100 if prev_index else 0.0
 
     title_mood = "🐂📈" if index_pct >= 0 else "🐻📉"
-    lines = [f"Kannapolis Index (KANDEX) {title_mood}", datetime.now().strftime("%B %d, %Y"), ""]
+    lines = [f"Kannapolis-Area Index (KANDEX) {title_mood}", datetime.now().strftime("%B %d, %Y"), ""]
     lines.extend(stock_lines)
     lines.append("")
     lines.append(f"KANDEX Composite: {index_value:,.2f}  {arrow(index_pct)} {index_pct:+.2f}%")

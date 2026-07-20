@@ -1,4 +1,4 @@
-# Kannapolis Index (KANDEX)
+# Kannapolis-Area Index (KANDEX)
 
 *by Brad Spry, Kannapolitan*
 
@@ -7,7 +7,7 @@ history in a local SQLite database (for trending), and prints a concise
 report.
 
 ```
-Kannapolis Index (KANDEX) 🐻📉
+Kannapolis-Area Index (KANDEX) 🐻📉
 July 19, 2026
 
 GOOGL Alphabet — $346.77 ⬇️ -3.0%
