@@ -51,8 +51,11 @@ pip3 install --user -r requirements.txt
 python3 kandex.py
 ```
 
-Run it once a day, after market close, for the cleanest results — see
-[How it works](#how-it-works) for why.
+Runs immediately on start, then sleeps and repeats automatically at 5:00pm
+on each weekday (after market close, for the cleanest results — see
+[How it works](#how-it-works) for why). Leave it running in a terminal, or
+under something like `nohup`/`tmux`/a background process, since it never
+exits on its own; `Ctrl+C` to stop it.
 
 ## How it works
 

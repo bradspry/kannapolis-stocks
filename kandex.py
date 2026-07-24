@@ -9,17 +9,25 @@
 """KANDEX (Kannapolis Index) — fetches quotes, stores a daily snapshot in
 SQLite for trending, and prints a concise text summary for a Facebook post.
 
+Runs once immediately, then repeats at 5:00pm on each weekday, sleeping in
+between. Leave it running in a terminal or background process.
+
 Usage:
     python kandex.py
 """
 
+import select
 import sqlite3
+import sys
+import time
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
 import yfinance as yf
 
 DB_PATH = Path(__file__).parent / "kandex.db"
+
+RUN_HOUR = 17  # 5:00pm
 
 COMPANIES = [
     ("GOOGL", "Alphabet"),
@@ -145,18 +153,62 @@ def build_report(conn, today, quotes):
     return "\n".join(lines)
 
 
-def main():
-    """Fetches today's quotes, stores them, and prints the KANDEX report."""
-    conn = sqlite3.connect(DB_PATH)
-    init_db(conn)
-    today = date.today().isoformat()
+def next_weekday_5pm(after):
+    """Next weekday occurrence of RUN_HOUR:00 strictly after `after`."""
+    candidate = after.replace(hour=RUN_HOUR, minute=0, second=0, microsecond=0)
+    if candidate <= after:
+        candidate += timedelta(days=1)
+    while candidate.weekday() >= 5:  # Saturday=5, Sunday=6
+        candidate += timedelta(days=1)
+    return candidate
 
+
+def sleep_until(target):
+    """Sleeps until target, showing a live countdown; Enter runs now, Ctrl-C stops."""
+    interactive = sys.stdin.isatty()
+    while True:
+        remaining = (target - datetime.now()).total_seconds()
+        if remaining <= 0:
+            break
+        mins, secs = divmod(int(remaining), 60)
+        hours, mins = divmod(mins, 60)
+        countdown = f"{hours}:{mins:02d}:{secs:02d}" if hours else f"{mins}:{secs:02d}"
+        print(
+            f"\r\033[KNext run in {countdown} — press Enter to run now, Ctrl-C to stop.",
+            end="",
+            flush=True,
+        )
+        if interactive:
+            ready, _, _ = select.select([sys.stdin], [], [], 1)
+            if ready:
+                sys.stdin.readline()
+                break
+        else:
+            time.sleep(1)
+    print("\r\033[K", end="")
+
+
+def run_once(conn):
+    """Fetches today's quotes, stores them, and prints the KANDEX report."""
+    today = date.today().isoformat()
     quotes = fetch_quotes()
     store_prices(conn, today, quotes)
     report = build_report(conn, today, quotes)
-
     print(report)
-    conn.close()
+
+
+def main():
+    """Runs immediately, then repeats at 5:00pm on each weekday."""
+    conn = sqlite3.connect(DB_PATH)
+    init_db(conn)
+
+    run_once(conn)
+    try:
+        while True:
+            sleep_until(next_weekday_5pm(datetime.now()))
+            run_once(conn)
+    except KeyboardInterrupt:
+        print("\nStopped.")
 
 
 if __name__ == "__main__":
