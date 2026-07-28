@@ -43,7 +43,6 @@ COMPANIES = [
 ]
 
 BASELINE_INDEX = 1000.0
-TREND_LOOKBACK_DAYS = 7
 
 
 def init_db(conn):
@@ -87,16 +86,6 @@ def store_prices(conn, today, quotes):
     conn.commit()
 
 
-def get_trend_price(conn, symbol, today):
-    """Most recent stored price at least TREND_LOOKBACK_DAYS old, if any."""
-    cutoff = (date.fromisoformat(today) - timedelta(days=TREND_LOOKBACK_DAYS)).isoformat()
-    row = conn.execute(
-        "SELECT price FROM prices WHERE symbol = ? AND date <= ? ORDER BY date DESC LIMIT 1",
-        (symbol, cutoff),
-    ).fetchone()
-    return row[0] if row else None
-
-
 def update_index(conn, today, avg_pct_change):
     """Compounds the composite index off the most recent prior day's value."""
     row = conn.execute(
@@ -131,14 +120,8 @@ def build_report(conn, today, quotes):
         pct = ((price - prev_close) / prev_close) * 100 if prev_close else 0.0
         pct_changes.append(pct)
 
-        trend_flag = ""
-        trend_price = get_trend_price(conn, symbol, today)
-        if trend_price:
-            trend_pct = ((price - trend_price) / trend_price) * 100
-            trend_flag = f"  (7d {arrow(trend_pct)}{trend_pct:+.1f}%)"
-
         stock_lines.append(
-            f"{symbol} {name} — ${price:,.2f} {arrow(pct)} {pct:+.1f}%{trend_flag}"
+            f"{symbol} {name} — ${price:,.2f} {arrow(pct)} {pct:+.1f}%"
         )
 
     avg_pct = sum(pct_changes) / len(pct_changes)
